@@ -3,23 +3,15 @@
 	Repo: https://github.com/tobycyanide/pytracer
 """
 
-from raytracer.math import (
-    sub,
-    dot,
-    length,
-    sum,
-    norm,
-    mul,
-    V3,
-    barycentric,
-    cross,
-    EPSILON,
-)
+from raytracer.math import *
 from raytracer.material import Intersect
 from math import sqrt, inf
 
 
 class Plane(object):
+    """
+    Creates a new Plane model    
+    """
     def __init__(self, position, normal, material):
         self.position = position
         self.normal = norm(normal)
@@ -39,34 +31,24 @@ class Plane(object):
 
 
 class Cube(object):
+    """
+    Creates a new Cube model    
+    """
     def __init__(self, position, size, material):
         self.position = position
         self.size = size
         self.material = material
-        self.planes = []
-
         mid_size = size / 2
 
-        self.planes.append(
-            Plane(sum(position, V3(mid_size, 0, 0)), V3(1, 0, 0), material)
-        )
-        self.planes.append(
-            Plane(sum(position, V3(-mid_size, 0, 0)), V3(-1, 0, 0), material)
-        )
-
-        self.planes.append(
-            Plane(sum(position, V3(0, mid_size, 0)), V3(0, 1, 0), material)
-        )
-        self.planes.append(
-            Plane(sum(position, V3(0, -mid_size, 0)), V3(0, -1, 0), material)
-        )
-
-        self.planes.append(
-            Plane(sum(position, V3(0, 0, mid_size)), V3(0, 0, 1), material)
-        )
-        self.planes.append(
+        self.planes = [
+            Plane(sum(position, V3(mid_size, 0, 0)), V3(1, 0, 0), material),
+            Plane(sum(position, V3(-mid_size, 0, 0)), V3(-1, 0, 0), material),
+            Plane(sum(position, V3(0, mid_size, 0)), V3(0, 1, 0), material),
+            Plane(sum(position, V3(0, -mid_size, 0)), V3(0, -1, 0), material),
+            Plane(sum(position, V3(0, 0, mid_size)), V3(0, 0, 1), material),
             Plane(sum(position, V3(0, 0, -mid_size)), V3(0, 0, -1), material)
-        )
+        ]
+        
 
     def ray_intersect(self, origin, direction):
         epsilon = 0.001
@@ -110,6 +92,9 @@ class Cube(object):
 
 
 class Sphere(object):
+    """
+    Creates a new Sphere model    
+    """
     def __init__(self, center, radius, material):
         self.center = center
         self.radius = radius
@@ -137,6 +122,9 @@ class Sphere(object):
 
 
 class Cylinder(object):
+    """
+    Creates a new Cylinder model    
+    """
     def __init__(self, radius, height, center, material):
         self.radius = radius
         self.height = height
@@ -207,3 +195,95 @@ class Cylinder(object):
 
         return None
 
+
+class Triangle(object):
+    """
+    Creates a new Triangle model    
+    """
+    def __init__(self, vertices, material):
+        self.vertices = vertices
+        self.material = material
+
+    def ray_intersect(self, origin, direction):
+        v0, v1, v2 = self.vertices
+        normal = norm(cross(sub(v1, v0), sub(v2, v0)))
+        determinant = dot(normal, direction)
+
+        if abs(determinant) < EPSILON:
+            return None
+
+        distance = dot(normal, v0)
+        t = (dot(normal, origin) + distance) / determinant
+
+        if t < 0:
+            return None
+
+        point = sum(origin, mul(direction, t))
+        u, v, w = barycentric(v0, v1, v2, point)
+
+        if w < 0 or v < 0 or u < 0:  # 0 is actually a valid value! (it is on the edge)
+            return None
+        else:
+            return Intersect(distance=distance, point=point, normal=norm(normal))
+
+        # Checks determinant with all edges
+        normal = norm(cross(sub(v1, v0), sub(point, v0)))
+        determinant = dot(normal, direction)
+
+        if abs(determinant) < EPSILON:
+            return None
+
+        normal = norm(cross(sub(v2, v1), sub(point, v1)))
+        determinant = dot(normal, direction)
+
+        if abs(determinant) < EPSILON:
+            return None
+
+        normal = norm(cross(sub(v0, v2), sub(point, v2)))
+        determinant = dot(normal, direction)
+
+        if abs(determinant) < EPSILON:
+            return None
+
+        return Intersect(distance=(t / determinant), point=point, normal=norm(normal))
+
+
+class Pyramid(object):
+    """
+    Creates a new Pyramid model (made of 4 triangles)
+    """
+
+    def __init__(self, vertices, material):
+        self.sides = self.generate_sides(vertices, material)
+        self.material = material
+
+    def generate_sides(self, vertices, material):
+        if len(vertices) != 4:
+            return [None, None, None, None]
+
+        v0, v1, v2, v3 = vertices
+        sides = [
+            Triangle([v0, v3, v2], material),
+            Triangle([v0, v1, v2], material),
+            Triangle([v1, v3, v2], material),
+            Triangle([v0, v1, v3], material),
+        ]
+        return sides
+
+    def ray_intersect(self, origin, direction):
+        t = float("inf")
+        intersect = None
+
+        for triangle in self.sides:
+            local_intersect = triangle.ray_intersect(origin, direction)
+            if local_intersect is not None:
+                if local_intersect.distance < t:
+                    t = local_intersect.distance
+                    intersect = local_intersect
+
+        if intersect is None:
+            return None
+
+        return Intersect(
+            distance=intersect.distance, point=intersect.point, normal=intersect.normal
+        )
