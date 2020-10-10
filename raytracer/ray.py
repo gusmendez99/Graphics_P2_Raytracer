@@ -15,6 +15,7 @@ class Raytracer(object):
         self.background_color = GREY
         self.scene = []
         self.light = None
+        self.envmap = None
         self.clear()
 
     def clear(self):
@@ -39,9 +40,9 @@ class Raytracer(object):
     def cast_ray(self, orig, direction, recursion=0):
         material, intersect = self.scene_intersect(orig, direction)
 
-        if (
-            material is None or recursion >= MAX_RECURSION_DEPTH
-        ):  # break recursion of reflections after n iterations
+        if material is None or recursion >= MAX_RECURSION_DEPTH:  # break recursion of reflections after n iterations
+            if self.envmap:
+                return self.envmap.get_color(direction)
             return self.background_color
 
         offset_normal = mul(intersect.normal, 1.1)

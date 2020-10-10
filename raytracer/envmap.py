@@ -1,4 +1,6 @@
-from raytracer.utils import Color, dword
+import struct
+from raytracer.utils import Color
+from raytracer.math import norm
 from math import acos, atan2, pi
 
 BLACK = Color(0, 0, 0)
@@ -11,11 +13,11 @@ class Envmap(object):
   def read(self):
     image = open(self.path, 'rb')
     image.seek(10)
-    header_size = dword(image.read(4))[0]
+    header_size = struct.unpack('=l', image.read(4))[0]
 
     image.seek(14 + 4)
-    self.width = dword(image.read(4))[0]
-    self.height = dword(image.read(4))[0]
+    self.width = struct.unpack('=l', image.read(4))[0]
+    self.height = struct.unpack('=l', image.read(4))[0]
     image.seek(header_size)
 
     self.pixels = []

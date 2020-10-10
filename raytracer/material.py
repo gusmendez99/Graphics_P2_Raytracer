@@ -4,6 +4,17 @@ from raytracer.math import V3
 WHITE = Color(255, 255, 255)
 
 
+class AmbientLight(object):
+    def __init__(self, strength = 0, _color = WHITE):
+        self.strength = strength
+        self.color = _color
+
+class PointLight(object):
+    def __init__(self, position = V3(0,0,0), _color = WHITE, intensity = 1):
+        self.position = position
+        self.intensity = intensity
+        self.color = _color
+
 class Light(object):
     def __init__(self, position=V3(0, 0, 0), intensity=1):
         self.position = position
