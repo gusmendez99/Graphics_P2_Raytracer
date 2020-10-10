@@ -140,7 +140,7 @@ class Cylinder(object):
     def __init__(self, radius, height, center, material):
         self.radius = radius
         self.height = height
-        self.closed = True
+        self.closed = False
         self.center = center
         self.material = material
 
@@ -184,23 +184,26 @@ class Cylinder(object):
 
         return self.intersect_caps(origin, direction)
 
-    def check_cap(self, origin, direction, t, radius):
+    def check_cap(self, origin, direction, t):
         x = origin.x + t * direction.x
         z = origin.z + t * direction.z
-        return (x ** 2 + z ** 2) <= abs(radius)
+        return (x ** 2 + z ** 2) <= abs(self.radius)
 
     def intersect_caps(self, origin, direction):
         if self.closed == False or abs(direction.y) < EPSILON:
             return None
 
-        t_lower = ((self.center.y - self.height) - origin.y) / direction.y
-        if self.check_cap(origin, direction, t_lower, 1):
+        t_lower = (self.center.y - origin.y) / direction.y
+        if self.check_cap(origin, direction, t_lower):
             hit = sum(origin, mul(direction, t_lower))
             normal = norm(sub(hit, self.center))
             return Intersect(distance=t_lower, point=hit, normal=normal)
 
         t_upper = ((self.center.y + self.height) - origin.y) / direction.y
-        if self.check_cap(origin, direction, t_upper, 1):
+        if self.check_cap(origin, direction, t_upper):
             hit = sum(origin, mul(direction, t_upper))
             normal = norm(sub(hit, self.center))
             return Intersect(distance=t_upper, point=hit, normal=normal)
+
+        return None
+

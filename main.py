@@ -23,7 +23,7 @@ render.background_color = GREY
 render.scene = [
     Cube(V3(2, -2, -10), 1, rubber),
     Sphere(V3(-1, -0.4, -5), 0.4, ivory),
-    Cylinder(0.3, 1.5, V3(0, 0, -4), rubber),
+    Cylinder(1, 0.8, V3(0, -1, -4), ivory),
 ]
 
 render.finish()
