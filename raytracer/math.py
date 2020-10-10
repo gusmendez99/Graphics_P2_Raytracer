@@ -1,5 +1,7 @@
 from collections import namedtuple
 
+EPSILON = 0.0001
+
 V2 = namedtuple("Vertex2", ["x", "y"])
 V3 = namedtuple("Vertex3", ["x", "y", "z"])
 

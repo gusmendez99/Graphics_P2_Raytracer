@@ -1,5 +1,4 @@
 from raytracer.utils import *
-from raytracer.sphere import Sphere
 from raytracer.math import norm, V3, dot, mul, sum, reflect, sub, length, refract
 from math import tan, pi
 
