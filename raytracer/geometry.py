@@ -62,6 +62,7 @@ class Cube(object):
 
         t = float("inf")
         intersect = None
+        texture_coords = None
 
         for plane in self.planes:
             plane_intersection = plane.ray_intersect(origin, direction)
@@ -83,11 +84,25 @@ class Cube(object):
                                 t = plane_intersection.distance
                                 intersect = plane_intersection
 
+                                if abs(plane.normal[2]) > 0:
+                                    coord0 = (plane_intersection.point [0] - min_bounds[0]) / (max_bounds[0] - min_bounds[0])
+                                    coord1 = (plane_intersection.point [1] - min_bounds[1]) / (max_bounds[1] - min_bounds[1])
+
+                                elif abs(plane.normal[1]) > 0:
+                                    coord0 = (plane_intersection.point [0] - min_bounds[0]) / (max_bounds[0] - min_bounds[0])
+                                    coord1 = (plane_intersection.point [2] - min_bounds[2]) / (max_bounds[2] - min_bounds[2])
+
+                                elif abs(plane.normal[0]) > 0:
+                                    coord0 = (plane_intersection.point [1] - min_bounds[1]) / (max_bounds[1] - min_bounds[1])
+                                    coord1 = (plane_intersection.point [2] - min_bounds[2]) / (max_bounds[2] - min_bounds[2])
+
+                                texture_coords = [coord0, coord1]
+
         if intersect is None:
             return None
 
         return Intersect(
-            distance=intersect.distance, point=intersect.point, normal=intersect.normal
+            distance=intersect.distance, point=intersect.point, normal=intersect.normal, text_coords=texture_coords
         )
 
 
