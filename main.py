@@ -25,7 +25,6 @@ glass = Material(
 )
 cement = Material(texture=Texture('./assets/cement.bmp'))
 grass = Material(texture=Texture('./assets/grass.bmp'))
-flag = Material(texture=Texture('./assets/flag.bmp'))
 
 # Just for get run time
 import time
