@@ -206,7 +206,7 @@ class Triangle(object):
 
     def ray_intersect(self, origin, direction):
         v0, v1, v2 = self.vertices
-        normal = norm(cross(sub(v1, v0), sub(v2, v0)))
+        normal = cross(sub(v1, v0), sub(v2, v0))
         determinant = dot(normal, direction)
 
         if abs(determinant) < EPSILON:
@@ -214,7 +214,6 @@ class Triangle(object):
 
         distance = dot(normal, v0)
         t = (dot(normal, origin) + distance) / determinant
-
         if t < 0:
             return None
 
@@ -223,29 +222,8 @@ class Triangle(object):
 
         if w < 0 or v < 0 or u < 0:  # 0 is actually a valid value! (it is on the edge)
             return None
-        else:
-            return Intersect(distance=distance, point=point, normal=norm(normal))
-
-        # Checks determinant with all edges
-        normal = norm(cross(sub(v1, v0), sub(point, v0)))
-        determinant = dot(normal, direction)
-
-        if abs(determinant) < EPSILON:
-            return None
-
-        normal = norm(cross(sub(v2, v1), sub(point, v1)))
-        determinant = dot(normal, direction)
-
-        if abs(determinant) < EPSILON:
-            return None
-
-        normal = norm(cross(sub(v0, v2), sub(point, v2)))
-        determinant = dot(normal, direction)
-
-        if abs(determinant) < EPSILON:
-            return None
-
-        return Intersect(distance=(t / determinant), point=point, normal=norm(normal))
+        
+        return Intersect(distance=distance, point=point, normal=norm(normal))
 
 
 class Pyramid(object):
@@ -281,9 +259,4 @@ class Pyramid(object):
                     t = local_intersect.distance
                     intersect = local_intersect
 
-        if intersect is None:
-            return None
-
-        return Intersect(
-            distance=intersect.distance, point=intersect.point, normal=intersect.normal
-        )
+        return intersect
